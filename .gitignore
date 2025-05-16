@@ -1,9 +1,22 @@
-# Angular
-/frontend/dist/
-/frontend/node_modules/
+# ========== GLOBAL ==========
+.env
+.DS_Store
+Thumbs.db
 
-# Django
+# ========== ANGULAR (frontend) ==========
+/frontend/node_modules/
+/frontend/dist/
+/frontend/.angular/cache/
+/frontend/.angular/config.json
+/frontend/.env
+
+# ========== DJANGO (backend) ==========
 /backend/__pycache__/
 /backend/db.sqlite3
+/backend/db.sqlite3-journal
 /backend/venv/
-.env
+/backend/*.pyc
+/backend/*.pyo
+/backend/*.log
+/backend/.env
+/backend/.vscode/
