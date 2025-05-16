@@ -34,6 +34,10 @@ export class TaskService {
     return this.http.delete<void>(`${environment.apiUrl}/tasks/${id}/`);
   }
 
+  addCollaborator(taskId: number, username: string): Observable<any> {
+    return this.http.post<any>(`${environment.apiUrl}/tasks/${taskId}/add_collaborator/`, { username });
+  }
+
   removeCollaborator(taskId: number, username: string): Observable<any> {
     return this.http.post<any>(`${environment.apiUrl}/tasks/${taskId}/remove_collaborator/`, {username});
   }
