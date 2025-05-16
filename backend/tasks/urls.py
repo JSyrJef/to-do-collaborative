@@ -10,7 +10,7 @@ urlpatterns = [
     path('', include(router.urls)),
     path('register/', views.register_user, name='register'),
     # Endpoints de autenticación JWT
-    path('login/', TokenObtainPairView.as_view(), name='token_obtain_pair'),  # Este es el endpoint de login
+    path('login/', TokenObtainPairView.as_view(), name='token_obtain_pair'),  
     path('token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
-    path('token/verify/', TokenVerifyView.as_view(), name='token_verify'),  # Para validación de token
+    path('token/verify/', TokenVerifyView.as_view(), name='token_verify'), 
 ]

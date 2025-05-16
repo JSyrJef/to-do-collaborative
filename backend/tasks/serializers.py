@@ -19,7 +19,25 @@ class UserSerializer(serializers.ModelSerializer):
         return user
 
 class TaskSerializer(serializers.ModelSerializer):
+    user = serializers.ReadOnlyField(source='user.username')
+    collaborators = serializers.SlugRelatedField(
+        many=True, 
+        slug_field='username',
+        queryset=User.objects.all(),
+        required=False
+    )
+
     class Meta:
         model = Task
-        fields = ['id', 'title', 'description', 'status', 'created_at', 'updated_at', 'user']
+        fields = ['id', 'title', 'description', 'status', 'created_at', 'updated_at', 'user', 'collaborators']
         read_only_fields = ['id','created_at', 'updated_at', 'user']
+
+    def validate_title(self, value):
+        if len(value.strip()) < 3:
+            raise serializers.ValidationError("El título debe tener al menos 3 caracteres.")
+        return value
+        
+    def validate_status(self, value):
+        if value not in [choice[0] for choice in Task.STATUS_CHOICES]:
+            raise serializers.ValidationError(f"El estado debe ser uno de: {', '.join([choice[0] for choice in Task.STATUS_CHOICES])}")
+        return value
