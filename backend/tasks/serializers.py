@@ -13,13 +13,18 @@ class UserSerializer(serializers.ModelSerializer):
     def create(self, validated_data):
         user = User.objects.create_user(
             username=validated_data['username'],
-            email=validated_data['email'],
+            email=validated_data.get('email', ''),
             password=validated_data['password']
         )
         return user
 
+# Serializer for Collaborator atribute
+class CollaboratorSerializer(serializers.ModelSerializer):
+    username = serializers.CharField()
+
+# Serializer for Task model
 class TaskSerializer(serializers.ModelSerializer):
-    user = serializers.ReadOnlyField(source='user.username')
+    owner = serializers.ReadOnlyField(source='user.username')
     collaborators = serializers.SlugRelatedField(
         many=True, 
         slug_field='username',
@@ -29,8 +34,8 @@ class TaskSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Task
-        fields = ['id', 'title', 'description', 'status', 'created_at', 'updated_at', 'user', 'collaborators']
-        read_only_fields = ['id','created_at', 'updated_at', 'user']
+        fields = ['id', 'title', 'description', 'status', 'created_at', 'updated_at', 'owner', 'collaborators']
+        read_only_fields = ['id','created_at', 'updated_at', 'owner']
 
     def validate_title(self, value):
         if len(value.strip()) < 3:

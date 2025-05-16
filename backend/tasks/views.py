@@ -3,7 +3,7 @@ from rest_framework.response import Response
 from rest_framework.decorators import api_view, permission_classes, action
 from django.shortcuts import get_object_or_404 
 from .models import Task
-from .serializers import TaskSerializer, UserSerializer
+from .serializers import TaskSerializer, UserSerializer, CollaboratorSerializer
 
 class IsOwner(permissions.BasePermission):
     """
@@ -54,20 +54,28 @@ class TaskViewSet(viewsets.ModelViewSet):
             return Response({"detail": "Solo el propietario puede añadir colaboradores"}, 
                             status=status.HTTP_403_FORBIDDEN)
         
-        username = request.data.get('username', None)
-        if not username:
-            return Response({"detail": "Se requiere nombre de usuario"}, 
-                            status=status.HTTP_400_BAD_REQUEST)
-        
-        try:
-            user = User.objects.get(username=username)
-            task.collaborators.add(user)
-            return Response({"detail": f"Usuario {username} añadido como colaborador"})
-        except User.DoesNotExist:
-            return Response({"detail": "Usuario no encontrado"}, 
-                            status=status.HTTP_404_NOT_FOUND)
+        serializer = CollaboratorSerializer(data=request.data)
+        if serializer.is_valid():
+            username = serializer.validated_data['username']
+            try:
+                user = User.objects.get(username=username)
+                # No añadir al propietario como colaborador
+                if user == request.user:
+                    return Response({"detail": "No puedes añadirte a ti mismo como colaborador"}, 
+                                    status=status.HTTP_400_BAD_REQUEST)
+                # No añadir colaboradores duplicados
+                if user in task.collaborators.all():
+                    return Response({"detail": "El usuario ya es colaborador"}, 
+                                    status=status.HTTP_400_BAD_REQUEST)
+                    
+                task.collaborators.add(user)
+                return Response({"detail": f"Usuario {username} añadido como colaborador"})
+            except User.DoesNotExist:
+                return Response({"detail": "Usuario no encontrado"}, 
+                                status=status.HTTP_404_NOT_FOUND)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
     
-    @action(detail=True, methods=['post'])
+    @action(detail=True, methods=['post'], serializer_class=CollaboratorSerializer)
     def remove_collaborator(self, request, pk=None):
         task = self.get_object()
         
@@ -76,19 +84,27 @@ class TaskViewSet(viewsets.ModelViewSet):
             return Response({"detail": "Solo el propietario puede eliminar colaboradores"}, 
                             status=status.HTTP_403_FORBIDDEN)
         
-        username = request.data.get('username', None)
-        if not username:
-            return Response({"detail": "Se requiere nombre de usuario"}, 
-                            status=status.HTTP_400_BAD_REQUEST)
-        
-        try:
-            user = User.objects.get(username=username)
-            if user in task.collaborators.all():
-                task.collaborators.remove(user)
-                return Response({"detail": f"Usuario {username} eliminado como colaborador"})
-            else:
-                return Response({"detail": "El usuario no es colaborador de esta tarea"}, 
-                                status=status.HTTP_400_BAD_REQUEST)
-        except User.DoesNotExist:
-            return Response({"detail": "Usuario no encontrado"}, 
-                            status=status.HTTP_404_NOT_FOUND)
+        serializer = CollaboratorSerializer(data=request.data)
+        if serializer.is_valid():
+            username = serializer.validated_data['username']
+            try:
+                user = User.objects.get(username=username)
+                if user in task.collaborators.all():
+                    task.collaborators.remove(user)
+                    return Response({"detail": f"Usuario {username} eliminado como colaborador"})
+                else:
+                    return Response({"detail": "El usuario no es colaborador de esta tarea"}, 
+                                    status=status.HTTP_400_BAD_REQUEST)
+            except User.DoesNotExist:
+                return Response({"detail": "Usuario no encontrado"}, 
+                                status=status.HTTP_404_NOT_FOUND)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    
+@api_view(['POST'])
+@permission_classes([permissions.AllowAny])
+def register_user(request):
+    serializer = UserSerializer(data=request.data)
+    if serializer.is_valid():
+        serializer.save()
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
+    return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
