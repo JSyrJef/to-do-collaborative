@@ -24,7 +24,7 @@ class Task(models.Model):
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='pending')
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
-    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='tasks')
+    owner = models.ForeignKey(User, on_delete=models.CASCADE, related_name='tasks')
     collaborators = models.ManyToManyField(User, related_name='collaborative_tasks', blank=True)
 
     class Meta:

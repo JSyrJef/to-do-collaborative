@@ -1,7 +1,7 @@
-from rest_framework import viewsets, permissions, status, filters
+from rest_framework import viewsets, permissions, status
 from rest_framework.response import Response
 from rest_framework.decorators import api_view, permission_classes, action
-from django.shortcuts import get_object_or_404 
+from django.contrib.auth.models import User
 from .models import Task
 from .serializers import TaskSerializer, UserSerializer, CollaboratorSerializer
 
@@ -10,7 +10,7 @@ class IsOwner(permissions.BasePermission):
     Custom permission to only allow owners of an object to edit it.
     """
     def has_object_permission(self, request, view, obj):
-        return obj.user == request.user
+        return obj.owner == request.user
 
 class IsOwnerOrCollaborator(permissions.BasePermission):
     """
@@ -18,11 +18,13 @@ class IsOwnerOrCollaborator(permissions.BasePermission):
     """
     def has_object_permission(self, request, view, obj):
         # Verificar si el usuario es propietario
-        if obj.user == request.user:
+        if obj.owner == request.user:
             return True
         
-        # Verificar si el usuario es colaborador (solo lectura para métodos seguros)
-        if request.method in permissions.SAFE_METHODS and request.user in obj.collaborators.all():
+        # Los colaboradores pueden ver y actualizar pero no eliminar
+        if request.user in obj.collaborators.all():
+            if request.method in ['DELETE']:
+                return False
             return True
         
         return False
@@ -30,27 +32,33 @@ class IsOwnerOrCollaborator(permissions.BasePermission):
 class TaskViewSet(viewsets.ModelViewSet):
     serializer_class = TaskSerializer
     permission_classes = [permissions.IsAuthenticated, IsOwnerOrCollaborator]
-    
+
     def get_queryset(self):
-        user = self.request.user
+        owner = self.request.user
         # Obtener tareas propias o en las que es colaborador
-        own_tasks = Task.objects.filter(user=user)
-        collaborative_tasks = Task.objects.filter(collaborators=user)
-        queryset = own_tasks.union(collaborative_tasks)
+        own_tasks = Task.objects.filter(owner=owner)
+        collaborative_tasks = Task.objects.filter(collaborators=owner)
+        # Usar distinct() para evitar duplicados
+        return (own_tasks | collaborative_tasks).distinct()
         
-        # Filtrar por estado si se proporciona
-        status_param = self.request.query_params.get('status', None)
+    def perform_create(self, serializer):
+        serializer.save(owner=self.request.user)
+    
+    # Filtrar por estado
+    def list(self, request):
+        queryset = self.get_queryset()
+        status_param = request.query_params.get('status', None)
         if status_param:
             queryset = queryset.filter(status=status_param)
-            
-        return queryset
-    
+        serializer = self.get_serializer(queryset, many=True)
+        return Response(serializer.data)
+
     @action(detail=True, methods=['post'])
     def add_collaborator(self, request, pk=None):
         task = self.get_object()
         
         # Solo el propietario puede añadir colaboradores
-        if task.user != request.user:
+        if task.owner != request.user:
             return Response({"detail": "Solo el propietario puede añadir colaboradores"}, 
                             status=status.HTTP_403_FORBIDDEN)
         
@@ -58,17 +66,17 @@ class TaskViewSet(viewsets.ModelViewSet):
         if serializer.is_valid():
             username = serializer.validated_data['username']
             try:
-                user = User.objects.get(username=username)
+                owner = User.objects.get(username=username)
                 # No añadir al propietario como colaborador
-                if user == request.user:
+                if owner == request.user:
                     return Response({"detail": "No puedes añadirte a ti mismo como colaborador"}, 
                                     status=status.HTTP_400_BAD_REQUEST)
                 # No añadir colaboradores duplicados
-                if user in task.collaborators.all():
+                if owner in task.collaborators.all():
                     return Response({"detail": "El usuario ya es colaborador"}, 
                                     status=status.HTTP_400_BAD_REQUEST)
                     
-                task.collaborators.add(user)
+                task.collaborators.add(owner)
                 return Response({"detail": f"Usuario {username} añadido como colaborador"})
             except User.DoesNotExist:
                 return Response({"detail": "Usuario no encontrado"}, 
@@ -80,7 +88,7 @@ class TaskViewSet(viewsets.ModelViewSet):
         task = self.get_object()
         
         # Solo el propietario puede eliminar colaboradores
-        if task.user != request.user:
+        if task.owner != request.user:
             return Response({"detail": "Solo el propietario puede eliminar colaboradores"}, 
                             status=status.HTTP_403_FORBIDDEN)
         

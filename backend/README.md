@@ -11,7 +11,7 @@ API RESTful para gestionar tareas colaborativas entre usuarios.
 - `POST /api/token/verify/`: Verificar validez del token
 
 ### Tareas
-- `GET /api/tasks/`: Listar tareas del usuario (propias y colaborativas, filtro opcional: ?status=<status>)
+- `GET /api/tasks/`: Listar tareas del usuario (propias y colaborativas, filtro opcional: ?status=<STATUS_CHOICES>)
 - `POST /api/tasks/`: Crear nueva tarea
 - `GET /api/tasks/{id}/`: Ver detalle de tarea
 - `PUT /api/tasks/{id}/`: Actualizar tarea completa

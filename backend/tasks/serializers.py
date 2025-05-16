@@ -11,20 +11,20 @@ class UserSerializer(serializers.ModelSerializer):
         fields = ['id', 'username', 'email', 'password'] 
     
     def create(self, validated_data):
-        user = User.objects.create_user(
+        owner = User.objects.create_user(
             username=validated_data['username'],
             email=validated_data.get('email', ''),
             password=validated_data['password']
         )
-        return user
+        return owner
 
 # Serializer for Collaborator atribute
-class CollaboratorSerializer(serializers.ModelSerializer):
+class CollaboratorSerializer(serializers.Serializer):
     username = serializers.CharField()
 
 # Serializer for Task model
 class TaskSerializer(serializers.ModelSerializer):
-    owner = serializers.ReadOnlyField(source='user.username')
+    owner = serializers.ReadOnlyField(source='owner.username')
     collaborators = serializers.SlugRelatedField(
         many=True, 
         slug_field='username',
