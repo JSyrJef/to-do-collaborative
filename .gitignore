@@ -1,0 +1,8 @@
+# Angular
+/frontend/dist/
+/frontend/node_modules/
+
+# Django
+/backend/__pycache__/
+/backend/db.sqlite3
+/backend/venv/
