@@ -9,6 +9,8 @@ Thumbs.db
 /frontend/.angular/cache/
 /frontend/.angular/config.json
 /frontend/.env
+/frontend/src/environments/environment.ts
+
 
 # ========== DJANGO (backend) ==========
 /backend/__pycache__/
