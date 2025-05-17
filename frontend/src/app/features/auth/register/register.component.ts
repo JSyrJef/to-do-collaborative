@@ -5,14 +5,14 @@ import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angula
 import { CommonModule } from '@angular/common';
 
 @Component({
-  selector: 'app-login',
+  selector: 'app-register',
   standalone: true,
-  templateUrl: './login.component.html',
-  styleUrl: './login.component.css',
+  templateUrl: './register.component.html',
+  styleUrls: ['./register.component.css'],
   imports: [CommonModule, ReactiveFormsModule, RouterModule]
 })
-export class LoginComponent {
-  loginForm: FormGroup;
+export class RegisterComponent {
+  registerForm: FormGroup;
   loading = false;
   error = '';
 
@@ -22,27 +22,28 @@ export class LoginComponent {
     private route: ActivatedRoute,
     private formBuilder: FormBuilder
   ) {
-    this.loginForm = this.formBuilder.group({
+    this.registerForm = this.formBuilder.group({
       username: ['', Validators.required],
-      password: ['', Validators.required]
+      password: ['', [Validators.required, Validators.minLength(6)]],
+      email: ['', [Validators.required, Validators.email]]
     });
   }
 
   onSubmit() {
-    if (this.loginForm.invalid) {
+    if (this.registerForm.invalid) {
       return;
     }
 
     this.loading = true;
     this.error = '';
 
-    this.authService.login(this.loginForm.value).subscribe({
+    this.authService.register(this.registerForm.value).subscribe({
       next: () => {
-        const returnUrl = this.route.snapshot.queryParams['returnUrl'] || '/tasks';
-        this.router.navigateByUrl(returnUrl);
+        // Al registrarse, redirigir al login para que inicie sesión
+        this.router.navigate(['/login']);
       },
       error: error => {
-        this.error = error.error.detail || 'Usuario o contraseña incorrectos';
+        this.error = error.error.detail || 'Error en el registro';
         this.loading = false;
       }
     });

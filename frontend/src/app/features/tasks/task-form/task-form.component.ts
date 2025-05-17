@@ -1,13 +1,14 @@
 import { Component, OnInit } from '@angular/core';
-import { FormBuilder, FormGroup, Validators } from '@angular/forms';
-import { ActivatedRoute, Router } from '@angular/router';
+import { FormBuilder, FormGroup, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
+import { ActivatedRoute, Router, RouterModule } from '@angular/router';
 import { Task } from '../../../core/models/task.model';
 import { TaskService } from '../../../core/services/task.service';
+import { CommonModule } from '@angular/common';
 
 @Component({
   selector: 'app-task-form',
   standalone: true,
-  imports: [],
+  imports: [CommonModule, ReactiveFormsModule, RouterModule, FormsModule],
   templateUrl: './task-form.component.html',
   styleUrl: './task-form.component.css'
 })
