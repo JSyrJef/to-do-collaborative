@@ -1,0 +1,22 @@
+<div class="flex min-h-screen flex-col">
+  <app-header [showButtons]="true"></app-header>  
+<main class="flex-auto flex items-center justify-center">
+    <section class="w-full flex items-center justify-center">
+        <div class="mx-auto flex max-w-[700px] flex-col items-center gap-6 text-center">
+            <h1 class="text-3xl font-bold leading-tight tracking-tighter md:text-5xl lg:text-6xl lg:leading-[1.1]">
+                Colabora en tareas con tu equipo en tiempo real
+            </h1>
+            <p class="max-w-[750px] text-lg text-muted-foreground sm:text-xl">
+                TaskTogether te permite asignar tareas y colaborar con tu equipo de forma eficiente.
+            </p>
+            <div class="flex flex-col gap-4 sm:flex-row">
+                <a routerLink="/register">
+                    <button class="bg-neutral-900 text-white rounded-md px-6 py-2 hover:bg-neutral-800">
+                        Comenzar ahora <mat-icon class="h-4 w-4 text-white">arrow_right</mat-icon>
+                    </button>
+                </a>
+            </div>
+        </div>
+    </section>
+</main>
+</div>

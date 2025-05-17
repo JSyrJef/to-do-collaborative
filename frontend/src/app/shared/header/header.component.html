@@ -1,0 +1,22 @@
+<header
+  class="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60"
+>
+  <div class="container flex h-16 items-center justify-between">
+    <div class="flex items-center gap-2 font-bold">
+      <mat-icon class="h-6 w-6 text-red-500">check_circle</mat-icon>
+      <span><a href="">{{title}}</a></span>
+    </div>
+    <div class="flex items-center gap-4" *ngIf="showButtons">
+      <a routerLink="/login">
+        <button mat-button color="primary">Iniciar Sesión</button>
+      </a>
+      <a routerLink="/register">
+        <button
+          class="bg-neutral-900 text-white rounded-md px-6 py-2 hover:bg-neutral-800"
+        >
+          Registrarse
+        </button>
+      </a>
+    </div>
+  </div>
+</header>
