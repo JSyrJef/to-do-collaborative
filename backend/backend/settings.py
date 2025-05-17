@@ -12,14 +12,27 @@ https://docs.djangoproject.com/en/5.2/ref/settings/
 
 from pathlib import Path
 from decouple import config
-
-SECRET_KEY = config('SECRET_KEY')
-DEBUG = config('DEBUG', default=False, cast=bool)
-ALLOWED_HOSTS = config('ALLOWED_HOSTS', cast=lambda v: [s.strip() for s in v.split(',')]) # List of allowed hosts
+import os
+import dj_database_url
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
+# carga de variables de entorno
+SECRET_KEY = config('SECRET_KEY', default='your-secret-key-for-dev')
+DEBUG = config('DEBUG', default=False, cast=bool)
+
+# configuracion de hosts permitidos
+ALLOWED_HOSTS = config('ALLOWED_HOSTS', cast=lambda v: [s.strip() for s in v.split(',')]) # List of allowed hosts
+
+# render settings
+RENDER_EXTERNAL_HOSTNAME = os.environ.get('RENDER_EXTERNAL_HOSTNAME')
+if RENDER_EXTERNAL_HOSTNAME:
+    ALLOWED_HOSTS.append(RENDER_EXTERNAL_HOSTNAME)
+
+if DEBUG:
+    # In development, allow all hosts
+    ALLOWED_HOSTS.extend(['localhost', '127.0.0.1'])
 
 # Application definition
 
@@ -55,9 +68,7 @@ REST_FRAMEWORK = {
 
 
 # CORS settings
-CORS_ALLOWED_ORIGINS = [
-    "http://localhost:4200", # Angular frontend development server
-]
+CORS_ALLOWED_ORIGINS = config('CORS_ALLOWED_ORIGINS', default='http://localhost:4200', cast=lambda v: [s.strip() for s in v.split(',')]) # List of allowed origins
 
 # Configuración de Simple JWT
 from datetime import timedelta 
@@ -76,6 +87,7 @@ MIDDLEWARE = [
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     'corsheaders.middleware.CorsMiddleware', # CORS middleware
+    'whitenoise.middleware.WhiteNoiseMiddleware', # WhiteNoise middleware
 ]
 
 ROOT_URLCONF = 'backend.urls'
@@ -108,6 +120,12 @@ DATABASES = {
     }
 }
 
+# Configuración para usar PostgreSQL en producción (Render)
+DATABASE_URL = os.environ.get('DATABASE_URL')
+if DATABASE_URL:
+    DATABASES['default'] = dj_database_url.config(
+        default=DATABASE_URL, conn_max_age=600
+    )
 
 # Password validation
 # https://docs.djangoproject.com/en/5.2/ref/settings/#auth-password-validators
@@ -144,6 +162,8 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/5.2/howto/static-files/
 
 STATIC_URL = 'static/'
+STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
+STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field
