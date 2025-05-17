@@ -1,0 +1,133 @@
+<div class="flex min-h-screen bg-gray-100">
+  <!-- Sidebar -->
+  <aside class="hidden md:flex md:w-64 flex-col border-r bg-white p-6">
+    <div class="flex items-center gap-2 font-bold">
+      <mat-icon class="h-6 w-6 text-red-500">check_circle</mat-icon>
+      <span>TaskTogether</span>
+    </div>
+    <nav class="mt-8 flex flex-col gap-2">
+      <a
+        routerLink="/tasks"
+        class="text-gray-700 hover:text-rose-600 font-medium"
+        >Mis Tareas</a
+      >
+    </nav>
+  </aside>
+
+  <!-- Main -->
+  <main class="flex-1">
+    <header
+      class="sticky top-0 bg-white border-b px-6 py-4 flex justify-between items-center z-10"
+    >
+      <h1 class="text-2xl font-bold">Detalle de la Tarea</h1>
+      <a
+        routerLink="/tasks"
+        class="bg-red-600 hover:bg-indigo-700 text-white font-medium py-2 px-4 rounded"
+      >
+        Regresar a la lista
+      </a>
+    </header>
+    <div class="px-6 py-4">
+      <!-- Acciones -->
+      <div class="flex space-x-2 mb-4">
+        <button
+          [routerLink]="['/tasks', task.id, 'edit']"
+          class="flex items-center gap-2 bg-blue-500 hover:bg-blue-600 text-white py-2 px-4 rounded font-medium shadow transition-colors duration-150"
+          title="Editar Tarea"
+        >
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            class="h-5 w-5"
+            viewBox="0 0 20 20"
+            fill="currentColor"
+          >
+            <path
+              d="M17.414 2.586a2 2 0 00-2.828 0l-8.586 8.586A2 2 0 005 13v2a1 1 0 001 1h2a2 2 0 001.414-.586l8.586-8.586a2 2 0 000-2.828zM6 15v-2l8.586-8.586 2 2L8 15H6z"
+            />
+          </svg>
+          <span>Editar</span>
+        </button>
+
+        <button
+          (click)="deleteTask()"
+          class="flex items-center gap-2 bg-red-500 hover:bg-red-600 text-white py-2 px-4 rounded font-medium shadow transition-colors duration-150"
+          title="Eliminar Tarea"
+        >
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            class="h-5 w-5"
+            viewBox="0 0 20 20"
+            fill="currentColor"
+          >
+            <path
+              fill-rule="evenodd"
+              d="M6 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm4 0a1 1 0 012 0v6a1 1 0 11-2 0V8zm2-5a1 1 0 00-1-1h-4a1 1 0 00-1 1v1H4a1 1 0 100 2h12a1 1 0 100-2h-2V3zm-7 3v10a2 2 0 002 2h6a2 2 0 002-2V6H5z"
+              clip-rule="evenodd"
+            />
+          </svg>
+          <span>Eliminar</span>
+        </button>
+
+        <button
+          *ngIf="task.status === 'pending'"
+          (click)="completeTask()"
+          class="flex items-center gap-2 bg-green-500 hover:bg-green-600 text-white py-2 px-4 rounded font-medium shadow transition-colors duration-150"
+          title="Completar Tarea"
+        >
+          <mat-icon>check_circle</mat-icon>
+          <span>Completar</span>
+        </button>
+        <button
+          *ngIf="task.status === 'completed'"
+          (click)="reopenTask()"
+          class="flex items-center gap-2 bg-yellow-500 hover:bg-yellow-600 text-white py-2 px-4 rounded font-medium shadow transition-colors duration-150"
+          title="Reabrir Tarea"
+        >
+          <mat-icon>autorenew</mat-icon>
+          <span>Reabrir</span>
+        </button>
+      </div>
+
+      <div class="flex flex-col md:flex-row gap-6">
+        <!-- Card Detalle de la tarea -->
+        <div class="bg-white shadow rounded p-6 flex-1 min-w-[300px]">
+          <div class="flex items-center justify-between mb-4">
+            <h2 class="text-xl font-semibold">Tarea: {{ task.title }}</h2>
+            <span
+              class="px-2 py-1 rounded text-xs font-medium"
+              [ngClass]="{
+                'bg-yellow-100 text-yellow-800': task.status === 'pending',
+                'bg-green-100 text-green-800': task.status === 'completed'
+              }"
+            >
+              {{ task.status === "pending" ? "Pendiente" : "Completada" }}
+            </span>
+          </div>
+          <div class="mb-4">
+            <p class="text-gray-700">Descripcion {{ task.description }}</p>
+          </div>
+          <div>
+            <h3 class="font-semibold mb-2">Colaboradores</h3>
+
+            <ng-container
+              *ngIf="
+                task && task.collaborators && task.collaborators.length > 0;
+                else noCollaborators
+              "
+            >
+              <ul class="list-disc list-inside text-gray-600">
+                <li *ngFor="let collaborator of task.collaborators">
+                  {{ collaborator }}
+                </li>
+              </ul>
+            </ng-container>
+
+            <ng-template #noCollaborators>
+              <p class="text-gray-500 text-sm">Sin colaboradores</p>
+            </ng-template>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+</div>

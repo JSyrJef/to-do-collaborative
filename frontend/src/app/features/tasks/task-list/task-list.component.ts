@@ -6,11 +6,12 @@ import { Router, RouterModule } from '@angular/router';
 import { ReactiveFormsModule } from '@angular/forms';
 import { User } from '../../../core/models/user.model';
 import { AuthService } from '../../../core/services/auth.service';
+import { MatIconModule } from '@angular/material/icon';
 
 @Component({
   selector: 'app-task-list',
   standalone: true,
-  imports: [CommonModule, RouterModule, ReactiveFormsModule],
+  imports: [CommonModule, RouterModule, ReactiveFormsModule, MatIconModule],
   templateUrl: './task-list.component.html',
   styleUrl: './task-list.component.css'
 })
@@ -53,42 +54,49 @@ export class TaskListComponent implements OnInit {
     });
   }
 
-  completeTask(task: Task): void {
-    this.taskService.updateTask(task.id!, { status: 'completed' })
-      .subscribe({
-        next: (updatedTask) => {
-          const index = this.tasks.findIndex(t => t.id === updatedTask.id);
-          if (index !== -1) {
-            this.tasks[index] = updatedTask;
-          }
-        }
-      });
-  }
+  // completeTask(task: Task): void {
+  //   this.taskService.updateTask(task.id!, { status: 'completed' })
+  //     .subscribe({
+  //       next: (updatedTask) => {
+  //         const index = this.tasks.findIndex(t => t.id === updatedTask.id);
+  //         if (index !== -1) {
+  //           this.tasks[index] = updatedTask;
+  //         }
+  //       }
+  //     });
+  // }
 
-  reopenTask(task: Task): void {
-    this.taskService.updateTask(task.id!, { status: 'pending' })
-      .subscribe({
-        next: (updatedTask) => {
-          const index = this.tasks.findIndex(t => t.id === updatedTask.id);
-          if (index !== -1) {
-            this.tasks[index] = updatedTask;
-          }
-        }
-      });
-  }
+  // reopenTask(task: Task): void {
+  //   this.taskService.updateTask(task.id!, { status: 'pending' })
+  //     .subscribe({
+  //       next: (updatedTask) => {
+  //         const index = this.tasks.findIndex(t => t.id === updatedTask.id);
+  //         if (index !== -1) {
+  //           this.tasks[index] = updatedTask;
+  //         }
+  //       }
+  //     });
+  // }
 
-  deleteTask(taskId: number): void {
-    if (confirm('Estas seguro de que quieres eliminar esta tarea?')) {
-      this.taskService.deleteTask(taskId)
-        .subscribe({
-          next: () => {
-            this.tasks = this.tasks.filter(task => task.id !== taskId);
-          },
-          error: (error) => {
-            console.error('Error deleting task:', error);
-          }
-        });
-    }
-  }
+  // deleteTask(taskId: number): void {
+  //   if (confirm('Estas seguro de que quieres eliminar esta tarea?')) {
+  //     this.taskService.deleteTask(taskId)
+  //       .subscribe({
+  //         next: () => {
+  //           this.tasks = this.tasks.filter(task => task.id !== taskId);
+  //         },
+  //         error: (error) => {
+  //           console.error('Error deleting task:', error);
+  //         }
+  //       });
+  //   }
+  // }
 
+  get completedTasksCount(): number {
+  return this.tasks.filter(t => t.status === 'completed').length;
+  } 
+
+  get pendingTasksCount(): number {
+  return this.tasks.filter(t => t.status === 'pending').length;
+  }
 }

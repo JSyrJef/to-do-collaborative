@@ -1,9 +1,8 @@
 import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ActivatedRoute, Router, RouterModule } from '@angular/router';
-import { Task } from '../../../core/models/task.model';
 import { TaskService } from '../../../core/services/task.service';
-import { CommonModule } from '@angular/common';
+import { CommonModule, Location } from '@angular/common';
 
 @Component({
   selector: 'app-task-form',
@@ -26,7 +25,8 @@ export class TaskFormComponent implements OnInit {
     private formBuilder: FormBuilder,
     private taskService: TaskService,
     private route: ActivatedRoute,
-    private router: Router
+    private router: Router,
+    private location: Location
   ) {
     this.taskForm = this.formBuilder.group({
       title: ['', [Validators.required, Validators.minLength(3)]],
@@ -80,7 +80,7 @@ export class TaskFormComponent implements OnInit {
       this.taskService.updateTask(this.taskId, this.taskForm.value)
         .subscribe({
           next: () => {
-            this.router.navigate(['/tasks']);
+            this.router.navigate([`/tasks/${this.taskId}`]);
           },
           error: error => {
             this.error = error.error.detail || 'Ha ocurrido un error al actualizar la tarea';
@@ -127,5 +127,9 @@ export class TaskFormComponent implements OnInit {
           this.taskForm.patchValue({ collaborators: current.filter((collab: string) => collab !== username) });
         }
       });
+  }
+
+  goBack(): void {
+    this.location.back();
   }
 }
