@@ -1,0 +1,15 @@
+[build]
+  publish = "dist/frontend"
+  command = "npm run build"
+
+# Configuración para SPA (Single Page Application)
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200
+
+# Headers para habilitar CORS si es necesario
+[[headers]]
+  for = "/*"
+    [headers.values]
+    Access-Control-Allow-Origin = "*"
