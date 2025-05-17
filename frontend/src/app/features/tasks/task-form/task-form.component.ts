@@ -20,6 +20,7 @@ export class TaskFormComponent implements OnInit {
   collaboratorUsername = '';
   error = '';
   addCollaboratorError = '';
+  collaborators: string[] = [];
   
   constructor(
     private formBuilder: FormBuilder,
@@ -30,7 +31,8 @@ export class TaskFormComponent implements OnInit {
     this.taskForm = this.formBuilder.group({
       title: ['', [Validators.required, Validators.minLength(3)]],
       description: [''],
-      status: ['pending', Validators.required]
+      status: ['pending', Validators.required],
+      collaborators: [[]]
     });
   }
   
@@ -56,6 +58,7 @@ export class TaskFormComponent implements OnInit {
             description: task.description,
             status: task.status
           });
+          this.taskForm.patchValue({ collaborators: task.collaborators || [] });
           this.loading = false;
         },
         error: () => {
@@ -120,7 +123,8 @@ export class TaskFormComponent implements OnInit {
     this.taskService.removeCollaborator(this.taskId, username)
       .subscribe({
         next: () => {
-          this.loadTask(); // Recargar tarea para ver colaboradores actualizados
+          const current = this.taskForm.value.collaborators || [];
+          this.taskForm.patchValue({ collaborators: current.filter((collab: string) => collab !== username) });
         }
       });
   }

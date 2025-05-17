@@ -2,8 +2,10 @@ import { Component, OnInit} from '@angular/core';
 import { Task } from '../../../core/models/task.model';
 import { TaskService } from '../../../core/services/task.service';
 import { CommonModule } from '@angular/common';
-import { RouterModule } from '@angular/router';
+import { Router, RouterModule } from '@angular/router';
 import { ReactiveFormsModule } from '@angular/forms';
+import { User } from '../../../core/models/user.model';
+import { AuthService } from '../../../core/services/auth.service';
 
 @Component({
   selector: 'app-task-list',
@@ -17,10 +19,22 @@ export class TaskListComponent implements OnInit {
   loading = false;
   filter: string | undefined;
 
-  constructor(private taskService: TaskService) {}
+  constructor(
+    private taskService: TaskService,
+    private authService: AuthService,
+    private router: Router
+  ) {}
+
+  user: User | null = null;
 
   ngOnInit(): void {
+    this.user = this.authService.getCurrentUser();
     this.loadTasks();
+  }
+
+  logout(): void {
+    this.authService.logout();
+    this.router.navigate(['/login']);
   }
 
   loadTasks(status?: string): void {
