@@ -12,9 +12,8 @@ export class redirectAuthGuard implements CanActivate {
   canActivate(): boolean {
     if (this.authService.isAuthenticated()) {
       this.router.navigate(['/tasks']);
-    } else {
-      this.router.navigate(['/']);
+      return false;
     }
-    return false;
+    return true;
   }
 }
