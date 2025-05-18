@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { BehaviorSubject, Observable, tap } from 'rxjs';
-import { AuthCredentials, AuthResponse, } from '../models/auth.model';
+import { AuthCredentials, AuthResponse } from '../models/auth.model';
 import { User } from '../models/user.model';
 import { environment } from '../../../environments/environment';
 
@@ -20,6 +20,9 @@ export class AuthService {
 
   constructor(private http: HttpClient) {}
 
+  isAuthenticated(): boolean {
+    return this.isAuthenticatedSubject.value;
+  }
   register(user: User & AuthCredentials): Observable<User> {
     return this.http.post<User>(`${environment.apiUrl}/register/`, user);
   }
@@ -64,14 +67,16 @@ export class AuthService {
     return !!this.getToken();
   }
 
-  refreshToken(): Observable<{access: string}> {
-    return this.http.post<{access: string}>(`${environment.apiUrl}/token/refresh/`, {
-      refresh: this.getRefreshToken(),
-    }).pipe(
-      tap((response) => {
-        localStorage.setItem(this.TOKEN_KEY, response.access);
-        this.isAuthenticatedSubject.next(true);
+  refreshToken(): Observable<{ access: string }> {
+    return this.http
+      .post<{ access: string }>(`${environment.apiUrl}/token/refresh/`, {
+        refresh: this.getRefreshToken(),
       })
-    );
+      .pipe(
+        tap((response) => {
+          localStorage.setItem(this.TOKEN_KEY, response.access);
+          this.isAuthenticatedSubject.next(true);
+        })
+      );
   }
 }
