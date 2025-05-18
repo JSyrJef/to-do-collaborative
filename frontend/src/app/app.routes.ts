@@ -10,8 +10,8 @@ import { redirectAuthGuard } from './core/guards/redirect-auth.guard';
 
 export const routes: Routes = [
     {path: '', component: HomeComponent},
-    {path: 'login', component: LoginComponent},
-    {path: 'register', component: RegisterComponent},
+    {path: 'login', component: LoginComponent, canActivate: [redirectAuthGuard]},
+    {path: 'register', component: RegisterComponent, canActivate: [redirectAuthGuard]},
     {path: 'tasks', component: TaskListComponent, canActivate: [AuthGuard]},
     {path: 'tasks/new', component: TaskFormComponent, canActivate: [AuthGuard]},
     {path: 'tasks/:id/edit', component: TaskFormComponent, canActivate: [AuthGuard]},
